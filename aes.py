@@ -54,7 +54,7 @@ if __name__ == '__main__':
     Nr = 10 # Number of rounds
     # key[4*Nk]
     w = [Nb*(Nr+1)]
-    rijndael.expand_keys(key, w, Nk, Nr)
+    # rijndael.expand_keys(key, w, Nk, Nr)
 
     print(binascii.hexlify(key))
     print(binascii.hexlify(plain_text))
