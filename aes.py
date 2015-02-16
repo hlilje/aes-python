@@ -1,7 +1,8 @@
 #!/usr/bin/python3
 """
-An bit implementation of the AES cipher. Reads a binary file from stdin and
-outputs the result on stdout.
+A 128-bit implementation of the AES cipher (encryption only).
+Reads a binary file from stdin and outputs the result on stdout.
+Spec: http://csrc.nist.gov/publications/fips/fips197/fips-197.pdf
 """
 
 import binascii, sys
@@ -53,11 +54,13 @@ if __name__ == '__main__':
     Nb = 4  # Number of columns (32-bit words) comprising the state
     Nk = 4  # Number of 32-bit words comprising the cipher key
     Nr = 10 # Number of rounds
-    # key[4*Nk]
-    w = [Nb*(Nr+1)]
-    # rijndael.expand_keys(key, w, Nk, Nr)
+    key_exp = rijndael.expand_keys(key, Nb, Nk, Nr)
 
+    print("Key:")
     print(binascii.hexlify(key))
+    print("Plaintext:")
     print(binascii.hexlify(plain_text))
+    print("Expanded key:")
+    for word in (key_exp): print(word)
 
     # sys.stdout.buffer.write(key)

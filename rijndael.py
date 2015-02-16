@@ -60,9 +60,13 @@ rcon = [0x8d, 0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80, 0x1b, 0x36,
 
 def xor(n, m):
     """
-    Performs byte-wise XOR of two bytearrays (n XOR m).
+    Perform byte-wise XOR of two bytearrays (n XOR m) if m is a bytearray,
+    otherwise of a bytearray n and a scalar m.
     """
-    return bytearray([n[i] ^ m[i] for i in range(len(n))])
+    if isinstance(m, bytearray):
+        return bytearray([n[i] ^ m[i] for i in range(len(n))])
+    else:
+        return bytearray([n[i] ^ m for i in range(len(n))])
 
 def sub_word(word):
     """
@@ -70,33 +74,39 @@ def sub_word(word):
     bytes to produce an output word.
     """
     for i in range(4): word[i] = sbox[i]
+    return word
 
 def rot_word(word):
     """
-    Take a word [a0,a1,a2,a3] as input, perform a cyclic permutation, and
-    return the word [a1,a2,a3,a0].
+    Take a word [a0, a1, a2, a3] as input, perform a cyclic permutation, and
+    return the word [a1, a2, a3, a0].
     """
     d = deque(word)
     d.rotate(-1)
     return bytearray(d)
 
-def expand_keys(key, w, Nk, Nr):
+def expand_keys(key, Nb, Nk, Nr):
     """
-    Extract round keys using Rijndael's key schedule.
+    Extract round keys using Rijndael's key schedule and return the new key.
     Implemented according to the AES specification.
     """
-    temp = bytearray([0, 0, 0, 0])
+    w = [0] * (Nb * (Nr + 1))      # Initialise word array
+    temp = bytearray([0, 0, 0, 0]) # Initialise temp word
+    # Initialise first words with cipher key
     i = 0
-    while i < Nk:
-        w[i] = bytearray(key[4*i], key[4*i+1], key[4*i+2], key[4*i+3])
+    for j in range(0, len(key), Nk):
+        w[i] = bytearray([key[j], key[j+1], key[j+2], key[j+3]])
         i = i + 1
 
     i = Nk
     while i < Nb * (Nr + 1):
         temp = w[i-1]
         if (i % Nk == 0):
-            temp = sub_word(xor(rot_word(temp)), rcon[i/Nk])
-        elif Nk > 6 and i % Nk == 4:
+            # Rotate word, substitute it and XOR with Rcon
+            temp = xor(sub_word(rot_word(temp)), rcon[int(i/Nk)])
+        elif Nk > 6 and i % Nk == 4: # Only performed on key size > 192
             temp = sub_word(temp)
         w[i] = xor(w[i-Nk], temp)
         i = i + 1
+
+    return w
