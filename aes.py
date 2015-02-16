@@ -17,14 +17,14 @@ def add_round_key(state, w, enc_round, Nb):
     Combine each byte of the state with a block of the round key using bitwise
     XOR.
     """
-    l = enc_round * Nb
-    # Column-wise XOR with key words
+    l = enc_round * Nb # Word offset
+    # Column-wise XOR of state with key words
     for i in range(Nb):
         col = bytearray()
         for j in range(Nb): col.append(state[j][i])
         col = hp.xor(col, w[l])
         for j in range(Nb): state[j][i] = col[j]
-        l = l + 1 
+        l = l + 1
 
 def sub_bytes(state):
     """
