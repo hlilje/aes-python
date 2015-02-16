@@ -4,6 +4,7 @@ Implementation of the Rijndael key schedule.
 """
 
 from collections import deque
+import helpers as hp
 
 # Rijndael S-box
 sbox = [0x63, 0x7c, 0x77, 0x7b, 0xf2, 0x6b, 0x6f, 0xc5, 0x30, 0x01, 0x67,
@@ -58,16 +59,6 @@ rcon = [0x8d, 0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80, 0x1b, 0x36,
         0xe8, 0xcb, 0x8d]
 
 
-def xor(n, m):
-    """
-    Perform byte-wise XOR of two bytearrays (n XOR m) if m is a bytearray,
-    otherwise of a bytearray n and a scalar m.
-    """
-    if isinstance(m, bytearray):
-        return bytearray([n[i] ^ m[i] for i in range(len(n))])
-    else:
-        return bytearray([n[i] ^ m for i in range(len(n))])
-
 def sub_word(word):
     """
     Take a four-byte input word and applies the S-box to each of the four
@@ -104,12 +95,12 @@ def expand_keys(key, Nb, Nk, Nr):
         if (i % Nk == 0):
             # Rotate word, substitute it and XOR with Rcon to transform
             # multiples of Nk
-            temp = xor(sub_word(rot_word(temp)), rcon[int(i/Nk)])
+            temp = hp.xor(sub_word(rot_word(temp)), rcon[int(i/Nk)])
         elif Nk > 6 and i % Nk == 4: # Only performed on key size > 192
             temp = sub_word(temp)
         # Set current word as XOR of previous and the word Nk positions
         # earlier
-        w[i] = xor(w[i-Nk], temp)
+        w[i] = hp.xor(w[i-Nk], temp)
         i = i + 1
 
     return w

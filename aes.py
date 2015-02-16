@@ -7,13 +7,17 @@ Spec: http://csrc.nist.gov/publications/fips/fips197/fips-197.pdf
 
 import binascii, sys
 import rijndael
+import helpers as hp
+
+KEY_LENGTH = 16 # Key length in bytes
 
 
-def add_round_key(state):
+def add_round_key(state, w, enc_round, Nb):
     """
     Combine each byte of the state with a block of the round key using bitwise
     XOR.
     """
+    l = enc_round * Nb
     pass
 
 def sub_bytes(state):
