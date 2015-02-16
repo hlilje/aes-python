@@ -4,7 +4,7 @@ An implementation of the AES cipher. Reads a binary file from stdin and outputs
 the result on stdout.
 """
 
-import sys, binascii
+import sys, binascii, rijndael
 
 KEY_LENGTH = 16 # Cipher key length in bytes
 BLOCK_SIZE = 16 # Block size in bytes
@@ -45,8 +45,11 @@ def encrypt():
     pass
 
 if __name__ == '__main__':
-    # Read
-    key = sys.stdin.buffer.read(KEY_LENGTH)
+    key = bytearray(sys.stdin.buffer.read(KEY_LENGTH)) # Read the cipher key
+    plain_text = bytearray(sys.stdin.buffer.read())    # Read the data to be encrypted
+    state = [[0] * 4 for i in range(4)]                # Initialise state 4 x 4 byte matrix
+
     print(binascii.hexlify(key))
+    print(binascii.hexlify(plain_text))
 
     # sys.stdout.buffer.write(key)
