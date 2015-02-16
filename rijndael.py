@@ -102,10 +102,13 @@ def expand_keys(key, Nb, Nk, Nr):
     while i < Nb * (Nr + 1):
         temp = w[i-1]
         if (i % Nk == 0):
-            # Rotate word, substitute it and XOR with Rcon
+            # Rotate word, substitute it and XOR with Rcon to transform
+            # multiples of N
             temp = xor(sub_word(rot_word(temp)), rcon[int(i/Nk)])
         elif Nk > 6 and i % Nk == 4: # Only performed on key size > 192
             temp = sub_word(temp)
+        # Set current word as XOR of previous and the word Nk positions
+        # earlier
         w[i] = xor(w[i-Nk], temp)
         i = i + 1
 
