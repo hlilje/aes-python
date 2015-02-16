@@ -18,7 +18,8 @@ def add_round_key(state, w, enc_round, Nb):
     XOR.
     """
     l = enc_round * Nb
-    pass
+    for i in range(Nb):
+        pass
 
 def sub_bytes(state):
     """
@@ -41,12 +42,13 @@ def mix_columns(state):
     """
     pass
 
-def encrypt(key_exp, w, Nb, Nr):
+def encrypt(plain_text, key_exp, Nb, Nr):
     """
     Encrypt the binary data with the given key.
     Return the final state.
     """
-    state = [[0] * 4 for i in range(Nb)] # Initialise state 4 x 4 byte matrix
+    state = [[0] * Nb for i in range(4)] # Initialise state 4 x Nb byte matrix
+    print(state)
     add_round_key(state, w[0][Nb-1])
 
     for i in range(1, Nr):
@@ -76,5 +78,7 @@ if __name__ == '__main__':
     print(binascii.hexlify(plain_text))
     print("Expanded key:")
     for word in (key_exp): print(word)
+
+    encrypt(plain_text, key_exp, Nb, Nr)
 
     # sys.stdout.buffer.write(key)
