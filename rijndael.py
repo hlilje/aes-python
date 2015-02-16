@@ -58,6 +58,12 @@ rcon = [0x8d, 0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80, 0x1b, 0x36,
         0xe8, 0xcb, 0x8d]
 
 
+def xor(n, m):
+    """
+    Performs byte-wise XOR of two bytearrays (n XOR m).
+    """
+    return bytearray([n[i] ^ m[i] for i in range(len(n))])
+
 def sub_word(word):
     """
     Take a four-byte input word and applies the S-box to each of the four
@@ -70,17 +76,15 @@ def rot_word(word):
     Take a word [a0,a1,a2,a3] as input, perform a cyclic permutation, and
     return the word [a1,a2,a3,a0].
     """
-
     d = deque(word)
     d.rotate(-1)
-    return d
+    return bytearray(d)
 
 def expand_keys(key, w, Nk, Nr):
     """
     Extract round keys using Rijndael's key schedule.
     Implemented according to the AES specification.
     """
-
     temp = bytearray([0, 0, 0, 0])
     i = 0
     while i < Nk:
@@ -91,8 +95,8 @@ def expand_keys(key, w, Nk, Nr):
     while i < Nb * (Nr + 1):
         temp = w[i-1]
         if (i % Nk == 0):
-            temp = sub_word(rot_word(temp)) ^ rcon[i/Nk]
+            temp = sub_word(xor(rot_word(temp)), rcon[i/Nk])
         elif Nk > 6 and i % Nk == 4:
             temp = sub_word(temp)
-        w[i] = w[i-Nk] ^ temp
+        w[i] = xor(w[i-Nk], temp)
         i = i + 1

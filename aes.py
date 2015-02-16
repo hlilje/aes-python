@@ -4,7 +4,7 @@ An bit implementation of the AES cipher. Reads a binary file from stdin and
 outputs the result on stdout.
 """
 
-import sys, binascii, rijndael
+import sys, binascii, rijndael, struct
 
 KEY_LENGTH = 16 # Cipher key length in bytes
 BLOCK_SIZE = 16 # Block size in bytes
