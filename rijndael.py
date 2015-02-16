@@ -103,7 +103,7 @@ def expand_keys(key, Nb, Nk, Nr):
         temp = w[i-1]
         if (i % Nk == 0):
             # Rotate word, substitute it and XOR with Rcon to transform
-            # multiples of N
+            # multiples of Nk
             temp = xor(sub_word(rot_word(temp)), rcon[int(i/Nk)])
         elif Nk > 6 and i % Nk == 4: # Only performed on key size > 192
             temp = sub_word(temp)
