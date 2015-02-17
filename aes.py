@@ -28,6 +28,13 @@ def create_states(plain_text, nb):
 
     return states
 
+def create_cipher_text(states):
+    """
+    Merge the encrypted states into cipher text.
+    """
+    # "byte for byte in state for state in states" in Python order
+    return bytearray([byte for state in states for byte in state])
+
 def rotate(state, steps):
     """
     Rotate the state steps to the left (positive) or right (negative).
@@ -145,7 +152,9 @@ if __name__ == '__main__':
     # Expand encryption key
     key_exp = rijndael.expand_keys(key, nb, nk, nr)
     # Encrypt the plain text (states)
-    cipher_text = encrypt(states, key_exp, nb, nr)
+    states_enc = encrypt(states, key_exp, nb, nr)
+    # Append encrypted states into cipher text
+    cipher_text = create_cipher_text(states_enc)
 
     print("Key:")
     print(binascii.hexlify(key))
@@ -155,7 +164,16 @@ if __name__ == '__main__':
     for state in states: print(binascii.hexlify(state))
     print("Expanded key:")
     print(binascii.hexlify(key_exp))
+    print("Encrypted states:")
+    for state in states_enc: print(binascii.hexlify(state))
     print("Cipher text:")
-    for text in cipher_text: print(binascii.hexlify(text))
+    print(binascii.hexlify(cipher_text))
+    print()
+    # Format text according to spec
+    print("Formatted plain text:")
+    print(str(binascii.hexlify(plain_text))[2:-1].upper())
+    print("Formatted cipher text:")
+    print(str(binascii.hexlify(cipher_text))[2:-1].upper())
 
-    # sys.stdout.buffer.write(key)
+    # Write the encrypted bytes to stdout
+    # sys.stdout.buffer.write(cipher_text)
