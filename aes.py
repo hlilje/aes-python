@@ -11,23 +11,24 @@ import rijndael
 KEY_LENGTH = 16 # Key length in bytes
 
 
-def add_round_key(state, w, enc_round, Nb):
+def add_round_key(state, key_exp, enc_round, offset):
     """
     Combine each byte of the state with a block of the round key using bitwise
     XOR.
     """
-    offset = (Nb ** 2)
     round_offset = enc_round * offset
-    key = w[round_offset:round_offset+offset]
+    round_key = key_exp[round_offset:round_offset+offset]
     # Column-wise XOR of state encryption key
-    for i in range(offset): state[i] = state[i] ^ key[i]
+    for i in range(offset): state[i] = state[i] ^ round_key[i]
 
-def sub_bytes(state):
+def sub_bytes(state, enc_round, offset):
     """
     Perform a non-linear substitution step by replacing each byte with another
     according to a lookup table.
     """
-    pass
+    round_offset = enc_round * offset
+    # Substitute with Sbox
+    for i in range(offset): state[i] = rijndael.sbox[state[i]]
 
 def shift_rows(state):
     """
@@ -43,23 +44,24 @@ def mix_columns(state):
     """
     pass
 
-def encrypt(plain_text, w, Nb, Nr):
+def encrypt(plain_text, key_exp, nb, nr):
     """
     Encrypt the binary data with the given key.
     Return the final state.
     """
-    state = [0] * (Nb ** 2)        # Initialise state 'matrix'
-    add_round_key(state, w, 0, Nb) # Initial key round
+    offset = (nb ** 2)
+    state = [0] * offset           # Initialise state 'matrix'
+    add_round_key(state, key_exp, 0, offset) # Initial key round
 
-    for i in range(1, Nr):
-        sub_bytes(state)
+    for i in range(1, nr):
+        sub_bytes(state, i, offset)
         shift_rows(state)
         mix_columns(state)
-        add_round_key(state, w, i, Nb)
+        add_round_key(state, key_exp, i, offset)
 
-    sub_bytes(state)
+    sub_bytes(state, i, offset)
     shift_rows(state)
-    add_round_key(state, w, Nr, Nb)
+    add_round_key(state, key_exp, nr, offset)
 
     return state
 
@@ -67,10 +69,11 @@ if __name__ == '__main__':
     key = bytearray(sys.stdin.buffer.read(KEY_LENGTH)) # Read the cipher key
     plain_text = bytearray(sys.stdin.buffer.read())    # Read the data to be encrypted
 
-    Nb = 4  # Number of columns (32-bit words) comprising the state
-    Nk = 4  # Number of 32-bit words comprising the cipher key
-    Nr = 10 # Number of rounds
-    key_exp = rijndael.expand_keys(key, Nb, Nk, Nr)
+    nb = 4  # Number of columns (32-bit words) comprising the state
+    nk = 4  # Number of 32-bit words comprising the cipher key
+    nr = 10 # Number of rounds
+    # Expanded encryption key
+    key_exp = rijndael.expand_keys(key, nb, nk, nr)
 
     print("Key:")
     print(binascii.hexlify(key))
@@ -79,6 +82,6 @@ if __name__ == '__main__':
     print("Expanded key:")
     print(binascii.hexlify(key_exp))
 
-    encrypt(plain_text, key_exp, Nb, Nr)
+    encrypt(plain_text, key_exp, nb, nr)
 
     # sys.stdout.buffer.write(key)

@@ -75,27 +75,27 @@ def rot_word(word):
     d.rotate(-1)
     return bytearray(d)
 
-def expand_keys(key, Nb, Nk, Nr):
+def expand_keys(key, nb, nk, nr):
     """
     Extract round keys using Rijndael's key schedule and return the new key.
     Implemented according to the AES specification.
     """
-    w = [0] * (Nb * (Nr + 1)) * 4  # Initialise expanded key
-    w[:Nk*4] = key                 # Initialise first words with cipher key
+    w = [0] * (nb * (nr + 1)) * 4  # Initialise expanded key
+    w[:nk*4] = key                 # Initialise first words with cipher key
     temp = [0, 0, 0, 0]            # Initialise temp word
 
-    offset = Nk * 4 # Byte offset to get next word
+    offset = nk * 4 # Byte offset to get next word
     i = offset
-    while i < Nb * (Nr + 1) * 4:
+    while i < nb * (nr + 1) * 4:
         temp = w[i-4:i]
         if (i % offset == 0):
             # Rotate word, substitute it and XOR with Rcon to transform
-            # multiples of Nk
+            # multiples of nk
             sub_rot = sub_word(rot_word(temp))
             for j in range(4): temp[j] = sub_rot[j] ^ rcon[int(i/offset)]
-        elif Nk > 6 and i % offset == 4: # Only performed on key size > 192
+        elif nk > 6 and i % offset == 4: # Only performed on key size > 192
             temp = sub_word(temp)
-        # Set current word as XOR of previous and the word Nk positions
+        # Set current word as XOR of previous and the word nk positions
         # earlier
         for j in range(4): w[i+j] = w[i-offset+j] ^ temp[j]
         i = i + 4
