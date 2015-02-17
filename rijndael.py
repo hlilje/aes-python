@@ -80,24 +80,29 @@ def expand_keys(key, nb, nk, nr):
     Extract round keys using Rijndael's key schedule and return the new key.
     Implemented according to the AES specification.
     """
-    w = [0] * (nb * (nr + 1)) * 4  # Initialise expanded key
-    w[:nk*4] = key                 # Initialise first words with cipher key
-    temp = [0, 0, 0, 0]            # Initialise temp word
+    w = [0] * (nb * (nr + 1)) * 4        # Initialise expanded key
+    w[:nk*4] = key                       # Initialise first words with cipher key
+    temp = [0, 0, 0, 0]                  # Initialise temp word
 
-    offset = nk * 4 # Byte offset to get next word
-    i = offset
-    while i < nb * (nr + 1) * 4:
+    exp_key_size = nb * (nr + 1) * 4     # Size of expanded key
+    rcon_it = 1                          # Iterator for Rcon
+    offset = nk * 4                      # Byte offset to get next word
+    i = offset                           # Current key size
+    while i < exp_key_size:
         temp = w[i-4:i]
         if (i % offset == 0):
             # Rotate word, substitute it and XOR with Rcon to transform
             # multiples of nk
             sub_rot = sub_word(rot_word(temp))
-            for j in range(4): temp[j] = sub_rot[j] ^ rcon[int(i/offset)]
-        elif nk > 6 and i % offset == 4: # Only performed on key size > 192
+            # XOR with Rcon for first part of word
+            sub_rot[0] = sub_rot[0] ^ rcon[rcon_it]
+            temp = sub_rot
+            rcon_it += 1
+        elif nk > 6 and i % offset == 16: # Only performed on key size > 192
             temp = sub_word(temp)
         # Set current word as XOR of previous and the word nk positions
         # earlier
         for j in range(4): w[i+j] = w[i-offset+j] ^ temp[j]
-        i = i + 4
+        i += 4
 
     return bytearray(w)
