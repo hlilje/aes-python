@@ -5,7 +5,7 @@ Reads a binary file from stdin and outputs the result on stdout.
 Spec: http://csrc.nist.gov/publications/fips/fips197/fips-197.pdf
 """
 
-import binascii, sys
+import binascii, copy, sys
 import rijndael
 
 KEY_LENGTH = 16 # Key length in bytes
@@ -13,8 +13,7 @@ KEY_LENGTH = 16 # Key length in bytes
 
 def rotate(state, steps):
     """
-    Helpher method to rotate the state steps to the left (positive) or
-    right (negative).
+    Rotate the state steps to the left (positive) or right (negative).
     """
     return state[steps:] + state[0:steps]
 
@@ -47,12 +46,32 @@ def shift_rows(state, nb):
         offset = i * nb
         state[offset:offset+nb] = rotate(state[offset:offset+nb], i)
 
-def mix_columns(state):
+def mix_column(column):
+    """
+    Mix one column by multiplying with constants (same as considering
+    them as polynomials in a field and performing modular operations).
+    """
+    temp = copy.copy(column) # Store temporary column for operations
+    column[0] = temp[0] * 2 + temp[1] * 3 + temp[2] * 1 + temp[3] * 1
+    column[1] = temp[0] * 1 + temp[1] * 2 + temp[2] * 3 + temp[3] * 1
+    column[2] = temp[0] * 1 + temp[1] * 1 + temp[2] * 2 + temp[3] * 3
+    column[3] = temp[0] * 3 + temp[1] * 1 + temp[2] * 1 + temp[3] * 2
+
+def mix_columns(state, nb):
     """
     Perform a mixing operation which operates on the columns of the states,
     combining the four bytes in each column.
     """
-    pass
+    for i in range(nb):
+        # Create column from the corresponding array positions
+        column = []
+        for j in range(nb): column.append(state[j*nb+i])
+
+        # Mix the extracted column
+        mix_column(column)
+
+        # Set the new column in the state
+        for j in range(nb): state[j*nb+i] = column[j]
 
 def encrypt(plain_text, key_exp, nb, nr):
     """
@@ -66,7 +85,7 @@ def encrypt(plain_text, key_exp, nb, nr):
     for i in range(1, nr):
         sub_bytes(state, i, offset)
         shift_rows(state, nb)
-        mix_columns(state)
+        mix_columns(state, nb)
         add_round_key(state, key_exp, i, offset)
 
     sub_bytes(state, i, offset)
