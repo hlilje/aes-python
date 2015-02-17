@@ -63,7 +63,7 @@ def sub_word(word):
     Take a four-byte input word and applies the S-box to each of the four
     bytes to produce an output word.
     """
-    for i in range(4): word[i] = sbox[i]
+    for i in range(4): word[i] = sbox[word[i]]
     return word
 
 def rot_word(word):
