@@ -7,7 +7,6 @@ Spec: http://csrc.nist.gov/publications/fips/fips197/fips-197.pdf
 
 import binascii, sys
 import rijndael
-import helpers as hp
 
 KEY_LENGTH = 16 # Key length in bytes
 
@@ -17,14 +16,10 @@ def add_round_key(state, w, enc_round, Nb):
     Combine each byte of the state with a block of the round key using bitwise
     XOR.
     """
-    l = enc_round * Nb # Word offset
-    # Column-wise XOR of state with key words
-    for i in range(Nb):
-        col = bytearray()
-        for j in range(Nb): col.append(state[j][i])
-        col = hp.xor(col, w[l])
-        for j in range(Nb): state[j][i] = col[j]
-        l = l + 1
+    offset = enc_round * (Nb ** 2) # State offset
+    key = w[offset:offset+(Nb ** 2)]
+    # Column-wise XOR of state encryption key
+    for i in range(Nb ** 2): state[i] = state[i] ^ key[i]
 
 def sub_bytes(state):
     """
@@ -52,19 +47,18 @@ def encrypt(plain_text, w, Nb, Nr):
     Encrypt the binary data with the given key.
     Return the final state.
     """
-    state = [[0] * Nb for i in range(4)] # Initialise state 4 x Nb byte matrix
-    print(state)
-    add_round_key(state, w[0][Nb-1], 0, Nb)
+    state = [0] * (Nb ** 2)        # Initialise state 'matrix'
+    add_round_key(state, w, 0, Nb) # Initial key round
 
     for i in range(1, Nr):
         sub_bytes(state)
         shift_rows(state)
         mix_columns(state)
-        add_round_key(state, w[i*Nb][(i+1)*Nb-1], i, Nb)
+        add_round_key(state, w, i, Nb)
 
     sub_bytes(state)
     shift_rows(state)
-    add_round_key(state, w[Nr*Nb][(Nr+1)*Nb-1], i, Nb)
+    add_round_key(state, w, Nr, Nb)
 
     return state
 
@@ -82,10 +76,8 @@ if __name__ == '__main__':
     print("Plaintext:")
     print(binascii.hexlify(plain_text))
     print("Expanded key:")
-    for word in (key_exp): print(word)
+    print(binascii.hexlify(key_exp))
 
-    add_round_key([[1,1,1,1],[2,2,2,2],[3,3,3,3],[4,4,4,4]], key_exp, 0, Nb)
-
-    # encrypt(plain_text, key_exp, Nb, Nr)
+    encrypt(plain_text, key_exp, Nb, Nr)
 
     # sys.stdout.buffer.write(key)

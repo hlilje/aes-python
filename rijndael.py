@@ -4,7 +4,6 @@ Implementation of the Rijndael key schedule.
 """
 
 from collections import deque
-import helpers as hp
 
 # Rijndael S-box
 sbox = [0x63, 0x7c, 0x77, 0x7b, 0xf2, 0x6b, 0x6f, 0xc5, 0x30, 0x01, 0x67,
@@ -81,26 +80,24 @@ def expand_keys(key, Nb, Nk, Nr):
     Extract round keys using Rijndael's key schedule and return the new key.
     Implemented according to the AES specification.
     """
-    w = [0] * (Nb * (Nr + 1))      # Initialise word array
-    temp = bytearray([0, 0, 0, 0]) # Initialise temp word
-    # Initialise first words with cipher key
-    i = 0
-    for j in range(0, len(key), Nk):
-        w[i] = bytearray([key[j], key[j+1], key[j+2], key[j+3]])
-        i = i + 1
+    w = [0] * (Nb * (Nr + 1)) * 4  # Initialise expanded key
+    w[:Nk*4] = key                 # Initialise first words with cipher key
+    temp = [0, 0, 0, 0]            # Initialise temp word
 
-    i = Nk
-    while i < Nb * (Nr + 1):
-        temp = w[i-1]
-        if (i % Nk == 0):
+    offset = Nk * 4 # Byte offset to get next word
+    i = offset
+    while i < Nb * (Nr + 1) * 4:
+        temp = w[i-4:i]
+        if (i % offset == 0):
             # Rotate word, substitute it and XOR with Rcon to transform
             # multiples of Nk
-            temp = hp.xor(sub_word(rot_word(temp)), rcon[int(i/Nk)])
-        elif Nk > 6 and i % Nk == 4: # Only performed on key size > 192
+            sub_rot = sub_word(rot_word(temp))
+            for j in range(4): temp[j] = sub_rot[j] ^ rcon[int(i/offset)]
+        elif Nk > 6 and i % offset == 4: # Only performed on key size > 192
             temp = sub_word(temp)
         # Set current word as XOR of previous and the word Nk positions
         # earlier
-        w[i] = hp.xor(w[i-Nk], temp)
-        i = i + 1
+        for j in range(4): w[i+j] = w[i-offset+j] ^ temp[j]
+        i = i + 4
 
-    return w
+    return bytearray(w)
