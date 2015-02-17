@@ -11,6 +11,23 @@ import rijndael
 KEY_LENGTH = 16 # Key length in bytes
 
 
+def create_states(plain_text, nb):
+    """
+    Split the given plain text into an array of states, padding
+    is added as necessary.
+    """
+    text_length = len(plain_text)
+    state_length = nb ** 2
+
+    # Pad with 0s to make it divisible into nb x nb states
+    diff = text_length % state_length
+    if diff != 0: plain_text.extend([0] * (state_length - diff))
+
+    states = [bytearray(plain_text[x:x+state_length]) for x in
+            range(0, len(plain_text), state_length)]
+
+    return states
+
 def rotate(state, steps):
     """
     Rotate the state steps to the left (positive) or right (negative).
@@ -92,26 +109,29 @@ def mix_columns(state, nb):
         # Set the new column in the state
         for j in range(nb): state[j*nb+i] = column[j]
 
-def encrypt(plain_text, key_exp, nb, nr):
+def encrypt(states, key_exp, nb, nr):
     """
-    Encrypt the binary data with the given key.
+    Encrypt the binary data (states) with the given expanded key.
     Return the final state.
     """
-    offset = (nb ** 2)                       # 'Matrix' offset
-    state = [0] * offset                     # Initialise state 'matrix'
-    add_round_key(state, key_exp, 0, offset) # Initial key round
+    enc_states = [] # Encrypted states
+    for state in states:
+        state = copy.copy(state)                 # Remove reference to old state
+        offset = (nb ** 2)                       # 'Matrix' offset
+        add_round_key(state, key_exp, 0, offset) # Initial key round
 
-    for i in range(1, nr):
+        for i in range(1, nr):
+            sub_bytes(state, i, offset)
+            shift_rows(state, nb)
+            mix_columns(state, nb)
+            add_round_key(state, key_exp, i, offset)
+
         sub_bytes(state, i, offset)
         shift_rows(state, nb)
-        mix_columns(state, nb)
-        add_round_key(state, key_exp, i, offset)
+        add_round_key(state, key_exp, nr, offset)
+        enc_states.append(state) # Save encrypted state
 
-    sub_bytes(state, i, offset)
-    shift_rows(state, nb)
-    add_round_key(state, key_exp, nr, offset)
-
-    return state
+    return enc_states
 
 if __name__ == '__main__':
     key = bytearray(sys.stdin.buffer.read(KEY_LENGTH)) # Read the cipher key
@@ -120,16 +140,22 @@ if __name__ == '__main__':
     nb = 4  # Number of columns (32-bit words) comprising the state
     nk = 4  # Number of 32-bit words comprising the cipher key
     nr = 10 # Number of rounds
-    # Expanded encryption key
+    # Split plain text into states
+    states = create_states(plain_text, nb)
+    # Expand encryption key
     key_exp = rijndael.expand_keys(key, nb, nk, nr)
+    # Encrypt the plain text (states)
+    cipher_text = encrypt(states, key_exp, nb, nr)
 
     print("Key:")
     print(binascii.hexlify(key))
-    print("Plaintext:")
+    print("Plain text:")
     print(binascii.hexlify(plain_text))
+    print("States:")
+    for state in states: print(binascii.hexlify(state))
     print("Expanded key:")
     print(binascii.hexlify(key_exp))
-
-    encrypt(plain_text, key_exp, nb, nr)
+    print("Cipher text:")
+    for text in cipher_text: print(binascii.hexlify(text))
 
     # sys.stdout.buffer.write(key)
