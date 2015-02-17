@@ -80,14 +80,14 @@ def expand_keys(key, nb, nk, nr):
     Extract round keys using Rijndael's key schedule and return the new key.
     Implemented according to the AES specification.
     """
-    w = [0] * (nb * (nr + 1)) * 4        # Initialise expanded key
-    w[:nk*4] = key                       # Initialise first words with cipher key
-    temp = [0, 0, 0, 0]                  # Initialise temp word
+    exp_key_size = nb * (nr + 1) * 4 # Size of expanded key
+    w = [0] * exp_key_size           # Initialise expanded key
+    w[:nk*4] = key                   # Initialise first words with cipher key
+    temp = [0, 0, 0, 0]              # Initialise temp word
+    offset = nk * 4                  # Byte offset to get next word
 
-    exp_key_size = nb * (nr + 1) * 4     # Size of expanded key
-    rcon_it = 1                          # Iterator for Rcon
-    offset = nk * 4                      # Byte offset to get next word
-    i = offset                           # Current key size
+    rcon_it = 1 # Iterator for Rcon
+    i = offset  # Current key size
     while i < exp_key_size:
         temp = w[i-4:i]
         if (i % offset == 0):
