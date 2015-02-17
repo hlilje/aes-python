@@ -46,16 +46,35 @@ def shift_rows(state, nb):
         offset = i * nb
         state[offset:offset+nb] = rotate(state[offset:offset+nb], i)
 
+def galois_mult(a, b):
+    """
+    Multiplication in the Galois field GF(2^8).
+    """
+    p = 0
+    hi_bit_set = 0
+    for i in range(8):
+        if b & 1 == 1: p ^= a
+        hi_bit_set = a & 0x80
+        a <<= 1
+        if hi_bit_set == 0x80: a ^= 0x1b
+        b >>= 1
+    return p % 256
+
 def mix_column(column):
     """
-    Mix one column by multiplying with constants (same as considering
-    them as polynomials in a field and performing modular operations).
+    Mix one column by by considering it as a polynomial and performing
+    operations in the Galois field (2^8).
     """
+    # XOR is addition in this field
     temp = copy.copy(column) # Store temporary column for operations
-    column[0] = temp[0] * 2 + temp[1] * 3 + temp[2] * 1 + temp[3] * 1
-    column[1] = temp[0] * 1 + temp[1] * 2 + temp[2] * 3 + temp[3] * 1
-    column[2] = temp[0] * 1 + temp[1] * 1 + temp[2] * 2 + temp[3] * 3
-    column[3] = temp[0] * 3 + temp[1] * 1 + temp[2] * 1 + temp[3] * 2
+    column[0] = galois_mult(temp[0], 2) ^ galois_mult(temp[1], 3) ^ \
+                galois_mult(temp[2], 1) ^ galois_mult(temp[3], 1)
+    column[1] = galois_mult(temp[0], 1) ^ galois_mult(temp[1], 2) ^ \
+                galois_mult(temp[2], 3) ^ galois_mult(temp[3], 1)
+    column[2] = galois_mult(temp[0], 1) ^ galois_mult(temp[1], 1) ^ \
+                galois_mult(temp[2], 2) ^ galois_mult(temp[3], 3)
+    column[3] = galois_mult(temp[0], 3) ^ galois_mult(temp[1], 1) ^ \
+                galois_mult(temp[2], 1) ^ galois_mult(temp[3], 2)
 
 def mix_columns(state, nb):
     """
