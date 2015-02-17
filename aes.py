@@ -16,10 +16,11 @@ def add_round_key(state, w, enc_round, Nb):
     Combine each byte of the state with a block of the round key using bitwise
     XOR.
     """
-    offset = enc_round * (Nb ** 2) # State offset
-    key = w[offset:offset+(Nb ** 2)]
+    offset = (Nb ** 2)
+    round_offset = enc_round * offset
+    key = w[round_offset:round_offset+offset]
     # Column-wise XOR of state encryption key
-    for i in range(Nb ** 2): state[i] = state[i] ^ key[i]
+    for i in range(offset): state[i] = state[i] ^ key[i]
 
 def sub_bytes(state):
     """
