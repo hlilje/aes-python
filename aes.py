@@ -68,13 +68,18 @@ def rotate(arr, steps):
     """
     return arr[steps:] + arr[0:steps]
 
-def add_round_key(state, key_exp, enc_round, offset):
+def add_round_key(state, key_exp, enc_round, offset, nk):
     """
     Combine each byte of the state with a block of the round key using bitwise
     XOR.
     """
-    round_offset = enc_round * offset
-    round_key = key_exp[round_offset:round_offset+offset]
+    round_key = [0] * offset
+    enc_round_offset = enc_round * offset
+    # Extract the transpose key to get order as columns instead of rows
+    for i in range(nk):
+        for j in range(nk):
+            round_key[j*nk+i] = key_exp[enc_round_offset+i*nk+j]
+
     # Column-wise XOR of state encryption key
     for i in range(offset): state[i] = state[i] ^ round_key[i]
 
@@ -142,7 +147,7 @@ def mix_columns(state, nb):
         # Set the new column in the state
         for j in range(nb): state[j*nb+i] = column[j]
 
-def encrypt(states, key_exp, nb, nr):
+def encrypt(states, key_exp, nb, nk, nr):
     """
     Encrypt the binary data (states) with the given expanded key.
     Return the final states in a list.
@@ -152,18 +157,18 @@ def encrypt(states, key_exp, nb, nr):
     offset = (nb ** 2) # 'Matrix' offset
     for state in states:
         state = copy.copy(state)                 # Remove reference to old state
-        add_round_key(state, key_exp, 0, offset) # Initial key round
+        add_round_key(state, key_exp, 0, offset, nk) # Initial key round
 
         for i in range(1, nr):
             sub_bytes(state, offset)
             shift_rows(state, nb)
             mix_columns(state, nb)
-            add_round_key(state, key_exp, i, offset)
+            add_round_key(state, key_exp, i, offset, nk)
 
         # Leave out MixColumns for final round
         sub_bytes(state, offset)
         shift_rows(state, nb)
-        add_round_key(state, key_exp, nr, offset)
+        add_round_key(state, key_exp, nr, offset, nk)
         enc_states.append(state) # Save encrypted state
 
     return enc_states
@@ -182,7 +187,7 @@ if __name__ == '__main__':
     # Split plain text into states
     states = create_states(plain_text, nb)
     # Encrypt the plain text (states)
-    states_enc = encrypt(states, key_exp, nb, nr)
+    states_enc = encrypt(states, key_exp, nb, nk, nr)
     # Append encrypted states into cipher text
     cipher_text = create_cipher_text(states_enc, nb)
 

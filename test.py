@@ -76,20 +76,22 @@ def test_add_round_key():
     """
     Test AddRoundKey.
     """
+    nk = 1
     state = [0] * 4
-    state_ref = [0, 1, 2, 3]
+    state_ref = [0, 0, 0, 0]
     key_exp = [0, 1, 2, 3]
     enc_round = 0
     offset = len(state)
-    aes.add_round_key(state, key_exp, enc_round, offset)
+    aes.add_round_key(state, key_exp, enc_round, offset, nk)
     assert(state == state_ref)
 
+    nk = 4
     state = [x+1 for x in range(-1, 15)]
-    state_ref = [0] * 16
+    state_ref = [0, 5, 10, 15, 5, 0, 15, 10, 10, 15, 0, 5, 15, 10, 5, 0]
     key_exp = [x+1 for x in range(-1, 15)]
     enc_round = 0
     offset = len(state)
-    aes.add_round_key(state, key_exp, enc_round, offset)
+    aes.add_round_key(state, key_exp, enc_round, offset, nk)
     assert(state == state_ref)
 
 def test_sub_bytes():
@@ -145,9 +147,9 @@ def test_aes_encryption():
     nr = 10
     states = aes.create_states(plain_text, nb)
     key_exp = rijndael.expand_keys(key, nb, nk, nr)
-    states_enc = aes.encrypt(states, key_exp, nb, nr)
+    states_enc = aes.encrypt(states, key_exp, nb, nk, nr)
 
-    result = aes.create_cipher_text(states_enc)
+    result = aes.create_cipher_text(states_enc, nb)
     result_ref = bytearray(binascii.unhexlify("52E418CBB1BE4949308B381691B109FE"))
     assert(result == result_ref)
 
