@@ -159,6 +159,9 @@ if __name__ == '__main__':
     # Append encrypted states into cipher text
     cipher_text = create_cipher_text(states_enc)
 
+    print("Nb (# state columns):", nb)
+    print("Nk (# key words):    ", nk)
+    print("Nr (# rounds):       ", nr)
     print("Key:")
     print(binascii.hexlify(key))
     print("Plain text:")
