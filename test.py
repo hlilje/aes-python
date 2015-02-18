@@ -44,6 +44,20 @@ def test_key_expansion():
     key_exp = rijndael.expand_keys(key, nb, nk, nr)
     assert(key_exp == key_ref)
 
+def test_rotate():
+    """
+    Test the state rotation algorithm for AES.
+    """
+    arr = [1, 2, 3, 4]
+    arr_ref = [2, 3, 4, 1]
+    arr = aes.rotate(arr, 1)
+    assert(arr == arr_ref)
+
+    arr = [1, 2, 3, 4]
+    arr_ref = [4, 1, 2 ,3]
+    arr = aes.rotate(arr, -1)
+    assert(arr == arr_ref)
+
 def test_aes_encryption():
     """
     Test the result of the full AES encryption algorithm.
@@ -68,4 +82,5 @@ def run_tests():
     Run all tests.
     """
     test_key_expansion()
-    test_aes_encryption()
+    test_rotate()
+    # test_aes_encryption()

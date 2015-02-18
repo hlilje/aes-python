@@ -35,11 +35,11 @@ def create_cipher_text(states):
     # "byte for byte in state for state in states" in Python order
     return bytearray([byte for state in states for byte in state])
 
-def rotate(state, steps):
+def rotate(arr, steps):
     """
-    Rotate the state steps to the left (positive) or right (negative).
+    Rotate the array steps to the left (positive) or right (negative).
     """
-    return state[steps:] + state[0:steps]
+    return arr[steps:] + arr[0:steps]
 
 def add_round_key(state, key_exp, enc_round, offset):
     """
