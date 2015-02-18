@@ -46,6 +46,7 @@ def add_round_key(state, key_exp, enc_round, offset):
     Combine each byte of the state with a block of the round key using bitwise
     XOR.
     """
+    # TODO Check that this is correct
     round_offset = enc_round * offset
     round_key = key_exp[round_offset:round_offset+offset]
     # Column-wise XOR of state encryption key
@@ -120,10 +121,11 @@ def encrypt(states, key_exp, nb, nr):
     Encrypt the binary data (states) with the given expanded key.
     Return the final state.
     """
-    enc_states = [] # Encrypted states
+    # TODO Add IV for multiple blocks.
+    enc_states = []    # Encrypted states
+    offset = (nb ** 2) # 'Matrix' offset
     for state in states:
         state = copy.copy(state)                 # Remove reference to old state
-        offset = (nb ** 2)                       # 'Matrix' offset
         add_round_key(state, key_exp, 0, offset) # Initial key round
 
         for i in range(1, nr):
@@ -132,6 +134,7 @@ def encrypt(states, key_exp, nb, nr):
             mix_columns(state, nb)
             add_round_key(state, key_exp, i, offset)
 
+        # Leave out MixColumns for final round
         sub_bytes(state, offset)
         shift_rows(state, nb)
         add_round_key(state, key_exp, nr, offset)
