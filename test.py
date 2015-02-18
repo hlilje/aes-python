@@ -3,6 +3,7 @@
 Tests for the key expansion and encryption algorithms.
 """
 
+import binascii, sys
 import aes, rijndael
 
 
@@ -27,6 +28,7 @@ def test_key_expansion():
                          0xb1, 0xd4, 0xd8, 0xe2, 0x8a, 0x7d, 0xb9, 0xda, 0x1d, 0x7b, 0xb3, 0xde, 0x4c, 0x66, 0x49, 0x41,
                          0xb4, 0xef, 0x5b, 0xcb, 0x3e, 0x92, 0xe2, 0x11, 0x23, 0xe9, 0x51, 0xcf, 0x6f, 0x8f, 0x18, 0x8e])
     assert(key_exp == key_ref)
+
     key = bytearray([0xff] * 16)
     key_ref = bytearray([0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
                          0xe8, 0xe9, 0xe9, 0xe9, 0x17, 0x16, 0x16, 0x16, 0xe8, 0xe9, 0xe9, 0xe9, 0x17, 0x16, 0x16, 0x16,
@@ -42,8 +44,28 @@ def test_key_expansion():
     key_exp = rijndael.expand_keys(key, nb, nk, nr)
     assert(key_exp == key_ref)
 
+def test_aes_encryption():
+    """
+    Test the result of the full AES encryption algorithm.
+    Expects the same input data as the example Kattis test.
+    """
+    key_length = 16
+    key = bytearray(sys.stdin.buffer.read(key_length))
+    plain_text = bytearray(sys.stdin.buffer.read())
+    nb = 4
+    nk = 4
+    nr = 10
+    states = aes.create_states(plain_text, nb)
+    key_exp = rijndael.expand_keys(key, nb, nk, nr)
+    states_enc = aes.encrypt(states, key_exp, nb, nr)
+
+    result = aes.create_cipher_text(states_enc)
+    result_ref = bytearray(binascii.unhexlify("52E418CBB1BE4949308B381691B109FE"))
+    assert(result == result_ref)
+
 def run_tests():
     """
     Run all tests.
     """
     test_key_expansion()
+    test_aes_encryption()
