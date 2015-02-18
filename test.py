@@ -71,9 +71,9 @@ def test_add_round_key():
     aes.add_round_key(state, key_exp, enc_round, offset)
     assert(state == state_ref)
 
-    state = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]
+    state = [x+1 for x in range(-1, 15)]
     state_ref = [0] * 16
-    key_exp = bytearray([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16])
+    key_exp = bytearray([x+1 for x in range(-1, 15)])
     enc_round = 0
     offset = len(state)
     aes.add_round_key(state, key_exp, enc_round, offset)
@@ -93,8 +93,13 @@ def test_shift_rows():
     """
     Test ShiftRows.
     """
-    state = [0] * 16
-    state_ref = [0]
+    nb = 16
+    state = [x+1 for x in range(-1, 15)]
+    state_ref = [x+1 for x in range(-1, 15)]
+    state_ref[4:8] = [5,6,7,4]
+    state_ref[8:12] = [10,11,8,9]
+    state_ref[12:16] = [15,12,13,14]
+    aes.shift_rows(state, 4)
     assert(state == state_ref)
 
 def test_aes_encryption():
