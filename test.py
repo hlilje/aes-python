@@ -58,6 +58,16 @@ def test_rotate():
     arr = aes.rotate(arr, -1)
     assert(arr == arr_ref)
 
+def test_sub_bytes():
+    """
+    Test SubBytes.
+    """
+    offset = 16
+    state = [0] * 16
+    state_ref = [0x63] * 16
+    aes.sub_bytes(state, offset)
+    assert(state == state_ref)
+
 def test_aes_encryption():
     """
     Test the result of the full AES encryption algorithm.
@@ -83,4 +93,5 @@ def run_tests():
     """
     test_key_expansion()
     test_rotate()
+    test_sub_bytes()
     # test_aes_encryption()
