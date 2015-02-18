@@ -151,6 +151,17 @@ def test_aes_encryption():
     result_ref = bytearray(binascii.unhexlify("52E418CBB1BE4949308B381691B109FE"))
     assert(result == result_ref)
 
+def test_create_cipher_text():
+    """
+    Test creating the final cipher text from states.
+    """
+    nb = 4
+    states = [[x+1 for x in range(-1, 15)]] * 2
+    states_ref = bytearray([0,4,8,12,1,5,9,13,2,6,10,14,3,7,11,15] +
+            [0,4,8,12,1,5,9,13,2,6,10,14,3,7,11,15])
+    states = aes.create_cipher_text(states, nb)
+    assert(states == states_ref)
+
 def run_tests():
     """
     Run all tests.
@@ -163,3 +174,4 @@ def run_tests():
     test_sub_bytes()
     test_mix_columns()
     # test_aes_encryption()
+    test_create_cipher_text()
