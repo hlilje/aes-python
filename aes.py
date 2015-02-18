@@ -174,7 +174,7 @@ def encrypt(states, key_exp, nb, nk, nr):
     return enc_states
 
 if __name__ == '__main__':
-    test.run_tests() # Run tests first
+    # test.run_tests() # Run tests first
 
     key = bytearray(sys.stdin.buffer.read(KEY_LENGTH)) # Read the cipher key
     plain_text = bytearray(sys.stdin.buffer.read())    # Read the data to be encrypted
@@ -191,6 +191,7 @@ if __name__ == '__main__':
     # Append encrypted states into cipher text
     cipher_text = create_cipher_text(states_enc, nb)
 
+    """
     print("Nb (# state columns):", nb)
     print("Nk (# key words):    ", nk)
     print("Nr (# rounds):       ", nr)
@@ -212,6 +213,7 @@ if __name__ == '__main__':
     print(str(binascii.hexlify(plain_text))[2:-1].upper())
     print("Formatted cipher text:")
     print(str(binascii.hexlify(cipher_text))[2:-1].upper())
+    """
 
     # Write the encrypted bytes to stdout
-    # sys.stdout.buffer.write(cipher_text)
+    sys.stdout.buffer.write(cipher_text)
