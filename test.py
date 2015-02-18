@@ -137,18 +137,16 @@ def test_mix_columns():
 def test_aes_encryption():
     """
     Test the result of the full AES encryption algorithm.
-    Expects the same input data as the example Kattis test.
+    Uses the same input data as the example Kattis test.
     """
-    key_length = 16
-    key = bytearray(sys.stdin.buffer.read(key_length))
-    plain_text = bytearray(sys.stdin.buffer.read())
+    key = bytearray(binascii.unhexlify("F4C020A0A1F604FD343FAC6A7E6AE0F9"))
+    plain_text = bytearray(binascii.unhexlify("F295B9318B994434D93D98A4E449AFD8"))
     nb = 4
     nk = 4
     nr = 10
     states = aes.create_states(plain_text, nb)
     key_exp = rijndael.expand_keys(key, nb, nk, nr)
     states_enc = aes.encrypt(states, key_exp, nb, nk, nr)
-
     result = aes.create_cipher_text(states_enc, nb)
     result_ref = bytearray(binascii.unhexlify("52E418CBB1BE4949308B381691B109FE"))
     assert(result == result_ref)
@@ -175,5 +173,5 @@ def run_tests():
     test_shift_rows()
     test_sub_bytes()
     test_mix_columns()
-    # test_aes_encryption()
+    test_aes_encryption()
     test_create_cipher_text()
