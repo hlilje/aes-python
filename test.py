@@ -62,10 +62,9 @@ def test_add_round_key():
     """
     Test AddRoundKey.
     """
-    # TODO This might still be incorrect
     state = [0] * 4
     state_ref = [0, 1, 2, 3]
-    key_exp = bytearray([0, 1, 2, 3])
+    key_exp = [0, 1, 2, 3]
     enc_round = 0
     offset = len(state)
     aes.add_round_key(state, key_exp, enc_round, offset)
@@ -73,7 +72,7 @@ def test_add_round_key():
 
     state = [x+1 for x in range(-1, 15)]
     state_ref = [0] * 16
-    key_exp = bytearray([x+1 for x in range(-1, 15)])
+    key_exp = [x+1 for x in range(-1, 15)]
     enc_round = 0
     offset = len(state)
     aes.add_round_key(state, key_exp, enc_round, offset)
@@ -99,6 +98,7 @@ def test_shift_rows():
     state_ref[4:8] = [5,6,7,4]
     state_ref[8:12] = [10,11,8,9]
     state_ref[12:16] = [15,12,13,14]
+    state_ref = state_ref
     aes.shift_rows(state, 4)
     assert(state == state_ref)
 

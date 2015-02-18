@@ -46,7 +46,6 @@ def add_round_key(state, key_exp, enc_round, offset):
     Combine each byte of the state with a block of the round key using bitwise
     XOR.
     """
-    # TODO Check that this is correct
     round_offset = enc_round * offset
     round_key = key_exp[round_offset:round_offset+offset]
     # Column-wise XOR of state encryption key
