@@ -29,14 +29,15 @@ def create_plain_states(plain_text, nb):
 
     return states
 
-def transpose_states(states):
+def transpose_states(states, nb):
     """
-    Transpose the state arrays to go by columns instead of rows.
+    Transpose the state arrays to go by columns instead of rows (or vice versa).
+    Slightly tricky since states are arrays and not matrices.
     """
     trans_states = []
     for state in states:
         # Create a matrix for easy transposing
-        state = [state[i:i+4] for i in range(0, len(state), 4)]
+        state = [state[i:i+4] for i in range(0, len(state), nb)]
         # Transpose matrix
         state = [list(i) for i in zip(*state)]
         # Merge rows into one array
@@ -50,12 +51,14 @@ def create_states(plain_text, nb):
     Create array of states as padded and transposed byte arrays.
     """
     states = create_plain_states(plain_text, nb)
-    return transpose_states(states)
+    return transpose_states(states, nb)
 
-def create_cipher_text(states):
+def create_cipher_text(states, nb):
     """
     Merge the encrypted states into cipher text.
     """
+    # Transpose states back to original row order
+    states = transpose_states(states, nb)
     # "byte for byte in state for state in states" in Python order
     return bytearray([byte for state in states for byte in state])
 
@@ -181,7 +184,7 @@ if __name__ == '__main__':
     # Encrypt the plain text (states)
     states_enc = encrypt(states, key_exp, nb, nr)
     # Append encrypted states into cipher text
-    cipher_text = create_cipher_text(states_enc)
+    cipher_text = create_cipher_text(states_enc, nb)
 
     print("Nb (# state columns):", nb)
     print("Nk (# key words):    ", nk)
