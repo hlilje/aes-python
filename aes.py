@@ -118,9 +118,9 @@ def mix_columns(state, nb):
 def encrypt(states, key_exp, nb, nr):
     """
     Encrypt the binary data (states) with the given expanded key.
-    Return the final state.
+    Return the final states in a list.
     """
-    # TODO Add IV for multiple blocks.
+    # TODO Add IV for multiple blocks
     enc_states = []    # Encrypted states
     offset = (nb ** 2) # 'Matrix' offset
     for state in states:
