@@ -5,11 +5,28 @@ Reads a binary file from stdin and outputs the result on stdout.
 Spec: http://csrc.nist.gov/publications/fips/fips197/fips-197.pdf
 """
 
-import binascii, copy, sys
+import binascii, copy, random, sys
 import rijndael, test
 
 KEY_LENGTH = 16 # Key length in bytes
 
+
+def generate_data(num_blocks, nb, randomise):
+    """
+    Generate the given amount of data in bytes.
+    The first 16 bytes is the key, the rest is the data.
+    If `randomise` is true, the data will be random, otherwise it will be 0.
+    """
+    data = []
+    data_length = num_blocks * (nb ** 2) + KEY_LENGTH
+    if randomise:
+        for i in range(data_length):
+            data.append(random.randint(0, 255))
+    else:
+        data = [0] * data_length
+    data = bytearray(data)
+
+    return(data)
 
 def create_plain_states(plain_text, nb):
     """
@@ -176,12 +193,17 @@ def encrypt(states, key_exp, nb, nk, nr):
 if __name__ == '__main__':
     # test.run_tests() # Run tests first
 
-    key = bytearray(sys.stdin.buffer.read(KEY_LENGTH)) # Read the cipher key
-    plain_text = bytearray(sys.stdin.buffer.read())    # Read the data to be encrypted
+    # key = bytearray(sys.stdin.buffer.read(KEY_LENGTH)) # Read the cipher key
+    # plain_text = bytearray(sys.stdin.buffer.read())    # Read the data to be encrypted
 
     nb = 4  # Number of columns (32-bit words) comprising the state
     nk = 4  # Number of 32-bit words comprising the cipher key
     nr = 10 # Number of rounds
+
+    data = generate_data(10 ** 6, nb, False)
+    key = data[:KEY_LENGTH]
+    plain_text = data[KEY_LENGTH:]
+
     # Expand encryption key
     key_exp = rijndael.expand_keys(key, nb, nk, nr)
     # Split plain text into states
@@ -191,7 +213,6 @@ if __name__ == '__main__':
     # Append encrypted states into cipher text
     cipher_text = create_cipher_text(states_enc, nb)
 
-    """
     print("Nb (# state columns):", nb)
     print("Nk (# key words):    ", nk)
     print("Nr (# rounds):       ", nr)
@@ -213,7 +234,6 @@ if __name__ == '__main__':
     print(str(binascii.hexlify(plain_text))[2:-1].upper())
     print("Formatted cipher text:")
     print(str(binascii.hexlify(cipher_text))[2:-1].upper())
-    """
 
     # Write the encrypted bytes to stdout
-    sys.stdout.buffer.write(cipher_text)
+    # sys.stdout.buffer.write(cipher_text)
