@@ -58,6 +58,18 @@ def test_rotate():
     arr = aes.rotate(arr, -1)
     assert(arr == arr_ref)
 
+def test_add_round_key():
+    """
+    Test AddRoundKey.
+    """
+    state = [0] * 4
+    state_ref = [0, 1, 2, 3]
+    key_exp = bytearray([0, 1, 2, 3])
+    enc_round = 0
+    offset = len(state)
+    aes.add_round_key(state, key_exp, enc_round, offset)
+    assert(state == state_ref)
+
 def test_sub_bytes():
     """
     Test SubBytes.
@@ -93,5 +105,6 @@ def run_tests():
     """
     test_key_expansion()
     test_rotate()
+    test_add_round_key()
     test_sub_bytes()
     # test_aes_encryption()
