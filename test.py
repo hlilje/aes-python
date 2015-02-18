@@ -102,6 +102,24 @@ def test_shift_rows():
     aes.shift_rows(state, 4)
     assert(state == state_ref)
 
+def test_mix_columns():
+    """
+    Test MixColumns.
+    """
+    nb = 4
+    state = [0xdb, 0xf2, 0x01, 0xc6,
+             0x13, 0x0a, 0x01, 0xc6,
+             0x53, 0x22, 0x01, 0xc6,
+             0x45, 0x5c, 0x01, 0xc6]
+    state_ref = [0x8e, 0x9f, 0x01, 0xc6,
+                 0x4d, 0xdc, 0x01, 0xc6,
+                 0xa1, 0x58, 0x01, 0xc6,
+                 0xbc, 0x9d, 0x01, 0xc6]
+    print(state)
+    print(state_ref)
+    aes.mix_columns(state, nb)
+    assert(state == state_ref)
+
 def test_aes_encryption():
     """
     Test the result of the full AES encryption algorithm.
@@ -130,4 +148,5 @@ def run_tests():
     test_add_round_key()
     test_shift_rows()
     test_sub_bytes()
+    test_mix_columns()
     # test_aes_encryption()
