@@ -54,6 +54,10 @@ def test_transpose_states():
     states = aes.transpose_states(states, nb)
     assert(states == states_ref)
 
+    states = aes.transpose_states(states, nb)
+    states_ref = [bytearray([x+1 for x in range(-1, 15)])] * 2
+    assert(states == states_ref)
+
 def test_rotate():
     """
     Test the state rotation algorithm for AES.
