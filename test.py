@@ -44,6 +44,16 @@ def test_key_expansion():
     key_exp = rijndael.expand_keys(key, nb, nk, nr)
     assert(key_exp == key_ref)
 
+def test_transpose_states():
+    """
+    Test transposing states.
+    """
+    nb = 4
+    states = [[x+1 for x in range(-1, 15)]] * 2
+    states_ref = [bytearray([0,4,8,12,1,5,9,13,2,6,10,14,3,7,11,15])] * 2
+    states = aes.transpose_states(states, nb)
+    assert(states == states_ref)
+
 def test_rotate():
     """
     Test the state rotation algorithm for AES.
@@ -142,6 +152,7 @@ def run_tests():
     Run all tests.
     """
     test_key_expansion()
+    test_transpose_states()
     test_rotate()
     test_add_round_key()
     test_shift_rows()
