@@ -6,7 +6,7 @@ Spec: http://csrc.nist.gov/publications/fips/fips197/fips-197.pdf
 """
 
 import binascii, copy, sys
-import rijndael
+import rijndael, test
 
 KEY_LENGTH = 16 # Key length in bytes
 
@@ -143,6 +143,8 @@ def encrypt(states, key_exp, nb, nr):
     return enc_states
 
 if __name__ == '__main__':
+    test.run_tests() # Run tests first
+
     key = bytearray(sys.stdin.buffer.read(KEY_LENGTH)) # Read the cipher key
     plain_text = bytearray(sys.stdin.buffer.read())    # Read the data to be encrypted
 
