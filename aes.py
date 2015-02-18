@@ -11,7 +11,7 @@ import rijndael, test
 KEY_LENGTH = 16 # Key length in bytes
 
 
-def create_states(plain_text, nb):
+def create_plain_states(plain_text, nb):
     """
     Split the given plain text into an array of states, padding
     is added as necessary.
@@ -23,10 +23,34 @@ def create_states(plain_text, nb):
     diff = text_length % state_length
     if diff != 0: plain_text.extend([0] * (state_length - diff))
 
-    states = [bytearray(plain_text[x:x+state_length]) for x in
+    # Split into multiple states if > state length
+    states = [plain_text[x:x+state_length] for x in
             range(0, len(plain_text), state_length)]
 
     return states
+
+def transpose_states(states):
+    """
+    Transpose the state arrays to go by columns instead of rows.
+    """
+    trans_states = []
+    for state in states:
+        # Create a matrix for easy transposing
+        state = [state[i:i+4] for i in range(0, len(state), 4)]
+        # Transpose matrix
+        state = [list(i) for i in zip(*state)]
+        # Merge rows into one array
+        state = [b for row in state for b in row]
+        trans_states.append(bytearray(state))
+
+    return trans_states
+
+def create_states(plain_text, nb):
+    """
+    Create array of states as padded and transposed byte arrays.
+    """
+    states = create_plain_states(plain_text, nb)
+    return transpose_states(states)
 
 def create_cipher_text(states):
     """
@@ -150,10 +174,10 @@ if __name__ == '__main__':
     nb = 4  # Number of columns (32-bit words) comprising the state
     nk = 4  # Number of 32-bit words comprising the cipher key
     nr = 10 # Number of rounds
-    # Split plain text into states
-    states = create_states(plain_text, nb)
     # Expand encryption key
     key_exp = rijndael.expand_keys(key, nb, nk, nr)
+    # Split plain text into states
+    states = create_states(plain_text, nb)
     # Encrypt the plain text (states)
     states_enc = encrypt(states, key_exp, nb, nr)
     # Append encrypted states into cipher text
