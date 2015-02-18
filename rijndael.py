@@ -64,7 +64,6 @@ def sub_word(word):
     bytes to produce an output word.
     """
     for i in range(4): word[i] = sbox[word[i]]
-    return word
 
 def rot_word(word):
     """
@@ -73,7 +72,7 @@ def rot_word(word):
     """
     d = deque(word)
     d.rotate(-1)
-    return bytearray(d)
+    word[:] = bytearray(d)
 
 def expand_keys(key, nb, nk, nr):
     """
@@ -93,13 +92,12 @@ def expand_keys(key, nb, nk, nr):
         if (i % offset == 0):
             # Rotate word, substitute it and XOR with Rcon to transform
             # multiples of nk
-            sub_rot = sub_word(rot_word(temp))
-            # XOR with Rcon for first part of word
-            sub_rot[0] = sub_rot[0] ^ rcon[rcon_it]
-            temp = sub_rot
+            rot_word(temp)
+            sub_word(temp)
+            temp[0] = temp[0] ^ rcon[rcon_it]
             rcon_it += 1
         elif nk > 6 and i % offset == 16: # Only performed on key size > 192
-            temp = sub_word(temp)
+            sub_word(temp)
         # Set current word as XOR of previous and the word nk positions
         # earlier
         for j in range(4): w[i+j] = w[i-offset+j] ^ temp[j]
