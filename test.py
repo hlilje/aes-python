@@ -115,8 +115,6 @@ def test_mix_columns():
                  0x4d, 0xdc, 0x01, 0xc6,
                  0xa1, 0x58, 0x01, 0xc6,
                  0xbc, 0x9d, 0x01, 0xc6]
-    print(state)
-    print(state_ref)
     aes.mix_columns(state, nb)
     assert(state == state_ref)
 
