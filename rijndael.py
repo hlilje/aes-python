@@ -60,7 +60,7 @@ rcon = [0x8d, 0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80, 0x1b, 0x36,
 
 def sub_word(word):
     """
-    Take a four-byte input word and applies the S-box to each of the four
+    Take a four-byte input word and apply the S-box to each of the four
     bytes to produce an output word.
     """
     for i in range(4): word[i] = sbox[word[i]]

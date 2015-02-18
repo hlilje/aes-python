@@ -51,12 +51,11 @@ def add_round_key(state, key_exp, enc_round, offset):
     # Column-wise XOR of state encryption key
     for i in range(offset): state[i] = state[i] ^ round_key[i]
 
-def sub_bytes(state, enc_round, offset):
+def sub_bytes(state, offset):
     """
     Perform a non-linear substitution step by replacing each byte with another
     according to a lookup table.
     """
-    round_offset = enc_round * offset
     # Substitute with Sbox
     for i in range(offset): state[i] = rijndael.sbox[state[i]]
 
@@ -128,12 +127,12 @@ def encrypt(states, key_exp, nb, nr):
         add_round_key(state, key_exp, 0, offset) # Initial key round
 
         for i in range(1, nr):
-            sub_bytes(state, i, offset)
+            sub_bytes(state, offset)
             shift_rows(state, nb)
             mix_columns(state, nb)
             add_round_key(state, key_exp, i, offset)
 
-        sub_bytes(state, i, offset)
+        sub_bytes(state, offset)
         shift_rows(state, nb)
         add_round_key(state, key_exp, nr, offset)
         enc_states.append(state) # Save encrypted state
