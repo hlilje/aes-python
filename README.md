@@ -2,7 +2,7 @@
 
 128-bit AES encryption in ECB mode written in Python. Does not decrypt files. Even has some trivial tests!
 
-Also available in [Java](https://github.com/hlilje/krypto15-aes-java).
+Also available in [Java](https://github.com/hlilje/aes-java).
 
 ## Usage
 
