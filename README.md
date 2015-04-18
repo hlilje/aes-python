@@ -1,4 +1,4 @@
-# krypto15-aes-python
+# aes-python
 
 128-bit AES encryption in ECB mode written in Python. Does not decrypt files. Even has some trivial tests!
 
